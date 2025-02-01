@@ -1,7 +1,3 @@
-# Souleymane Diallo
-# PennID: 63283765
-# I worked alone on this assignment
-
 # import the random module
 # use "winnings = random.randint(2, 10)" to generate a random int from 2 - 10 and store in a variable "winnings"
 import random

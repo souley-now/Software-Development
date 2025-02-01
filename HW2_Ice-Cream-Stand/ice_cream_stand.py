@@ -10,12 +10,6 @@ Topics Covered:
 - Formatted Strings
 """
 
-# TODO: Students, fill out statement of work header
-# Student Name in Canvas: Souley Diallo
-# Penn ID: 63283765
-# Did you do this homework on your own (yes / no): yes
-# Resources used outside course materials: None
-
 # import statements
 #Note we use from ... import ... 
 #This means you can use randint directly without random.randint()
