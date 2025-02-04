@@ -1,6 +1,6 @@
 # TODO: Students, fill out statement of work header
 # Student Name in Canvas:Souley Diallo
-# Penn ID:
+# Penn ID: 63283765
 # Did you do this homework on your own (yes / no): yes
 # Resources used outside course materials: None
 
@@ -107,7 +107,7 @@ def get_card_from_pile(pile, index):
     """Removes the entry at the specified index of the given pile (water or power) and modifies the pile by reference. 
     This function returns the entry at the specified index. HINT: Use the pop function
     """
-    
+    # Remove and return the entry at the specified index
     return pile.pop(index)
 
 
@@ -121,11 +121,11 @@ def arrange_cards(cards_list):
     if not cards_list:
         return
         
-    # Separate water cards (integer) and power card (strings)
+    # Separate water cards (integer) and power cards (strings)
     water_card = [card for card in cards_list if isinstance(card, int)]
     power_card = [card for card in cards_list if isinstance(card, str)]
     
-    # Sort cards
+    # Sort water cards in ascending order and power cards in alphabetical order
     water_card.sort()
     power_card.sort()
 
@@ -133,6 +133,7 @@ def arrange_cards(cards_list):
     water_cards_to_use = water_card[:3] if len(water_card) >= 3 else water_card
     power_cards_to_use = power_card[:2] if len(power_card) >= 2 else power_card
     
+    # Update the original cards_list with the sorted water and power cards
     cards_list[:] = water_cards_to_use + power_cards_to_use
 
 
@@ -171,12 +172,18 @@ def apply_overflow(tank_level):
     
     Return the tank level. If no overflow occurred, this is just the starting tank level.
     """
+    # Define the maximum fill value
     maximum_fill_value = 80
+    
+    # Check if the tank level exceeds the maximum fill value
     if tank_level > maximum_fill_value:
+        # Calculate the overflow amount
         overflow = tank_level - maximum_fill_value
+        # Return the adjusted tank level after applying overflow
         return maximum_fill_value - overflow
-    return tank_level   
-
+    
+    # Return the original tank level if no overflow occurred
+    return tank_level
 
 
 def use_card(player_tank, card_to_use, player_cards, opponent_tank):
@@ -186,20 +193,33 @@ def use_card(player_tank, card_to_use, player_cards, opponent_tank):
 
     Return a 2-tuple containing the player's tank and the opponent's tank, respectively.
     """
-    card_value = player_cards.pop(card_to_use)
-    
+    # Find the index of the card to use and remove it from the player's hand
+    card_index = player_cards.index(card_to_use)
+    card_value = player_cards.pop(card_index)
+
+    # Check if the card is a water card (integer)
     if isinstance(card_value, int):
+        # Add the water card value to the player's tank
         player_tank += card_value
-        if player_tank > 80:
-            player_tank = apply_overflow(player_tank)
     else:
+        # Check if the card is a power card and apply the corresponding effect
         if card_value == 'SOH':
-            opponent_tank = int(opponent_tank / 2)
+            # Steal half of the opponent's tank value
+            value = int(opponent_tank / 2)
+            opponent_tank -= value
+            player_tank += value
         elif card_value == 'DOT':
+            # Drain the opponent's tank
             opponent_tank = 0
         elif card_value == 'DMT':
-            player_tank = apply_overflow(player_tank * 2)
-    
+            # Double the player's tank value
+            player_tank *= 2
+
+    # Apply overflow rules if the tank level exceeds 80
+    if player_tank > 80:
+        player_tank = apply_overflow(player_tank)
+
+    # Return the updated tank levels for both players
     return (player_tank, opponent_tank)
 
 
@@ -211,12 +231,17 @@ def discard_card(card_to_discard, player_cards, water_cards_pile, power_cards_pi
     
     This function does not return anything.
     """
-    card_value = player_cards.pop(card_to_discard)
-
+    # Find the index of the card to discard from the player's hand
+    card_index = player_cards.index(card_to_discard)
+    card_value = player_cards.pop(card_index)
+    
+    # Check the card type; if the card is an integer, put it back at the bottom of the water pile
     if isinstance(card_value, int):
         water_cards_pile.append(card_value)
+    # If the card is a string, put it back at the bottom of the power pile
     else:
         power_cards_pile.append(card_value)
+
 
 def filled_tank(tank):
     """Determine if the tank level is between the maximum and minimum fill values (inclusive).
@@ -224,10 +249,15 @@ def filled_tank(tank):
     Return a boolean representing whether the tank is filled.
     This will be True if the tank is filled.
     """
+    # Define the maximum and minimum fill values
     maximum_value = 80
     minimum_value = 75
+    
+    # Check if the tank level is within the acceptable range
     if minimum_value <= tank <= maximum_value:
         return True
+    
+    # Return False if the tank level is outside the acceptable range
     return False
 
 
@@ -236,17 +266,24 @@ def check_pile(pile, pile_type):
     pile_type is a string to determine what type of pile you are checking (“water” or “power”)
     This function does not return anything.
     """
+    # Check if pile is empty
     if len(pile) == 0:
+        # Check to see if the empty pile is the water pile
         if pile_type.lower() == 'water':
+            # Replenish the water pile
             pile.extend(setup_water_cards())
+        # Check to see if the empty pile is the power pile
         elif pile_type.lower() == 'power':
+            # Replenish the power pile
             pile.extend(setup_power_cards())
         else:
+            # Print an error message if the pile type is invalid
             print("Invalid inputs, please enter 'water' or 'power'.")
     
 
 def human_play(human_tank, human_cards, water_cards_pile, power_cards_pile, opponent_tank):
     """
+    Function to handle the human player's turn.
     - Show the human player's water level and then the computer player's water level.
     - Show the human player their hand and ask them if they want to use or discard a card. If the human player enters an invalid answer, reprompt until a valid answer is entered.
     - Carry out the human's turn based on the action they have chosen (based on user input). 
@@ -258,114 +295,153 @@ def human_play(human_tank, human_cards, water_cards_pile, power_cards_pile, oppo
     - Return a 2-tuple containing the human's tank level and the computer's tank level, respectively.
     """
 
-    print("Human water tank level is {}. Opponents water tank level is {}. Human cards are {}".format(human_tank, opponent_tank, human_cards) )
+    # Print the current tank levels and the human's cards
+    print("Your water level is at: {}. \nComputer's water level is at: {}. \nYour cards are: {}\n".format(human_tank, opponent_tank, human_cards))
     
     while True:
-        action = get_user_input('Would you like to "use" or "discard" a card? ').lower()
-        if action not in ["use", "discard"]:
-            print('Invalid action. Please enter "use" or "discard".')
+        # Ask the human player if they want to use or discard a card
+        try:
+            action = str(get_user_input('Would you like to "use" or "discard" a card? u/d: ').lower())
+            if action not in ["u", "d"]:
+                print('Invalid action. Please enter "u" or "d".')
+                continue
+        except:
+            print('Invalid action. Please enter "u" or "d".')
             continue
-        
-        card = get_user_input('Which card would you like to {}? '.format(action))
-        if card in human_cards:
-            print('Card {}ed: {}'.format(action, card))
-            card_index = human_cards.index(card)
-            if action == "use":
-                human_tank, opponent_tank = use_card(human_tank, card_index, human_cards, opponent_tank)
-                if human_tank > 80:
-                    if isinstance(card, int):
-                        potential_tank = apply_overflow(human_tank + card)
-                        if filled_tank(potential_tank):
-                            print('Congrats, you have won!')
-                        break
-                else:
-                    if filled_tank(human_tank):
-                        print("Congrats you have won!")
-                        break
-            else:
-                discard_card(card_index, human_cards, water_cards_pile, power_cards_pile)
             
+        # Ask the human player which card they want to use or discard
+        card = get_user_input('\nWhich card would you like to use or discard? ')
+        if card in human_cards:
+            # Check and use if play want to use a card
+            if action == "u":
+                print('Card used: {}\n'.format(card))
+                # Use the selected card and update the tank levels
+                human_tank, opponent_tank = use_card(human_tank, card, human_cards, opponent_tank)
+                
+                if human_tank > 80:
+                    # Apply overflow rules if the tank level exceeds 80
+                    human_tank = apply_overflow(human_tank)
+            else:
+                # Discard the selected card
+                print('Card discarded: {}\n'.format(card))
+                discard_card(card, human_cards, water_cards_pile, power_cards_pile)
+            
+            # Draw a new card of the same type
             if isinstance(card, int):
                 new_card = get_card_from_pile(water_cards_pile, 0)
             else:
                 new_card = get_card_from_pile(power_cards_pile, 0)
             
+            # Add the new card to the human's hand
             human_cards.append(new_card)
+            # Arrange the human's cards
             arrange_cards(human_cards)
             break
         else:
-            print('Invalid entry, please choose a card from your hand.')
+            print('\nInvalid entry, please choose a card from your hand.\n')
+    
+    # Print the updated tank levels after the turn
+    print("Your water level is now at: {}. \nComputer's water level is now at: {}. \nYour cards are now: {}\n".format(human_tank, opponent_tank, human_cards))
 
     return (human_tank, opponent_tank)
 
 
 def computer_play(computer_tank, computer_cards, water_cards_pile, power_cards_pile, opponent_tank):
-    """This is the function where you can write the computer's strategy. 
-    - You are supposed to be somewhat creative here, but make sure your code is deterministic (not random).
-    - The computer's strategy should consider all of its cards when playing. For example, you should not have a strategy where the computer always plays the first water card or the first power card.
-    - The computer should not “cheat.” They should not be able to see any cards from the human's hand, the water card pile or power card pile. When they draw a card, they should only see that card and no cards from the rest of the water or power card pile.
+    """
+    This function handles the computer's turn.
+    - The computer's strategy should consider all of its cards when playing.
+    - The computer should not “cheat.” They should not be able to see any cards from the human's hand, the water card pile, or power card pile.
     - This function should carry out the computer's turn based on the action that the computer chooses.
     - Remember to handle potential overflows.
     - Print the card the computer player uses or discards.
     - Once the computer has used or discarded a card, give them a new card of the same type they just used/discarded.
     - Make sure that the computer's hand is still properly arranged after adding the new card.
-    - Return a 2-tuple containing the computer's tank level and the human's tank level, respectively
+    - Return a 2-tuple containing the computer's tank level and the human's tank level, respectively.
     """
 
     best_card = None
-    best_card_type = None
 
-    # Iterate through the computer's cards to find the best card to play
+    # Print the current tank levels
+    print("Computer's water level is at: {}. \nYour water level is at: {}\n".format(computer_tank, opponent_tank))
+
+    # Check if the computer can win with a power card
     for card in computer_cards:
-        if isinstance(card, int):  # Check if the card is a water card
-            potential_tank = apply_overflow(computer_tank + card)
-            if filled_tank(potential_tank):
+        if card == 'DMT' and computer_tank * 2 >= 75:
+            best_card = card
+            break
+    
+    # Check if the computer can win with a water card
+    for card in computer_cards:
+        if isinstance(card, int):
+            if card + computer_tank >= 75:
                 best_card = card
-                best_card_type = 'water'
                 break
-            if best_card is None or (card > best_card and computer_tank + card <= 80):
+
+    # Check if the opponent is close to winning and the computer has special cards to use
+    if best_card is None and 36 <= opponent_tank <= 75:
+        for card in computer_cards:
+            if card == 'SOH' or card == 'DOT':
                 best_card = card
-                best_card_type = 'water'
-        else:  # Check if the card is a power card
-            if best_card is None or (best_card_type == 'water' and card in ['SOH', 'DOT', 'DMT']):
-                best_card = card
-                best_card_type = 'power'
+                break
+    
+    # Check if the opponent tank is between 10 and 30 computer have two SOH cards.
+    soh_counter = 0
+    for card in computer_cards:
+        if card == 'SOH':
+            soh_counter += 1
+        if soh_counter == 2 and 10 <= opponent_tank <= 30:
+            best_card = card
+            break
+                
+    # If no special card was chosen, iterate through the computer's cards to find the best water card to play
+    if best_card is None:
+        for card in computer_cards:
+            if isinstance(card, int):  # Check if the card is a water card
+                potential_tank = computer_tank + card
+                if 75 <= potential_tank <= 80:
+                    best_card = card
+                    break
+                if best_card is None or (card > best_card and potential_tank <= 80):
+                    best_card = card
 
-    if best_card is not None:
-        if best_card.isdigit():
-            if not filled_tank(computer_tank):
-                # Remove the best card from the computer's hand
-                computer_cards.remove(best_card)
-                if best_card_type == 'water':
-                    computer_tank += best_card
-                    if computer_tank > 80:
-                        # Apply overflow rules to the computer's tank
-                        computer_tank = apply_overflow(computer_tank)
-                    # Draw a new water card from the pile
-                    new_card = get_card_from_pile(water_cards_pile, 0)
-        else:
-            if not filled_tank(computer_tank):
-                if best_card == 'SOH':
-                    opponent_tank = int(opponent_tank / 2)
-                elif best_card == 'DOT':
-                    opponent_tank = 0
-                elif best_card == 'DMT':
-                    computer_tank *= 2
-                    computer_tank = apply_overflow(computer_tank)
-                # Draw a new power card from the pile
-                new_card = get_card_from_pile(power_cards_pile, 0)
+    # If no valid card is found, discard the first card
+    if best_card is None:
+        best_card = computer_cards[0]
 
-        # Print the card the computer player used
-        print(f"Computer used card: {best_card}")
+    if isinstance(best_card, int):
+        # Use the best water card and update the tank level
+        computer_tank += best_card
+        if computer_tank > 80:
+            computer_tank = apply_overflow(computer_tank)
+        new_card = get_card_from_pile(water_cards_pile, 0)
+    else:
+        # Use the best power card and update the tank levels accordingly
+        if best_card == 'SOH':
+            value = int(opponent_tank / 2)
+            computer_tank += value
+            opponent_tank -= value
+        elif best_card == 'DOT':
+            opponent_tank = 0
+        elif best_card == 'DMT':
+            computer_tank *= 2
+            if computer_tank > 80:
+                computer_tank = apply_overflow(computer_tank)
+        new_card = get_card_from_pile(power_cards_pile, 0)
 
-        # Add the new card to the computer's hand
-        computer_cards.append(new_card)
-        # Arrange the computer's cards
-        arrange_cards(computer_cards)
+    # Print the card the computer is playing
+    print(f"Computer playing with card: {best_card}")
 
-    # Return the updated tank levels
+    # Remove the used card from the computer's hand
+    computer_cards.remove(best_card)
+
+    # Add the new card to the computer's hand
+    computer_cards.append(new_card)
+    arrange_cards(computer_cards)
+
+    # Print the updated tank levels after the turn
+    print("Computer's water level is now at: {}. \nYour water level is now at: {}. \n".format(computer_tank, opponent_tank))
+
     return (computer_tank, opponent_tank)
-
 
 
 def main():
@@ -373,51 +449,53 @@ def main():
     Main function to run the water tank game.
     Initializes the game, deals cards, and manages turns between human and computer players.
     """
-    # Print gaming instructions and rules
-    print("Water Tank is a competitive card game played between two players (Human vs Computer). Each player starts with an empty water tank, which they need to fill. The goal is to be the first player to fill their tank. A tank is filled if it reaches the value of 75 to 80 units (inclusive). The human player's moves are decided by the user playing the game, by asking for input, and the computer's moves are decided by the program that you will write.")
-
-    # Initialize tank levels for human and computer
+    # Initialize Tanks
     human_tank = 0
     computer_tank = 0
-
 
     try:
         # Set up the water and power card piles
         water_cards_pile, power_cards_pile = setup_cards()
         
-        # Deal cards to human and computer players
+        # Deal cards to both players
         human_cards, computer_cards = deal_cards(water_cards_pile, power_cards_pile)
-
+        
         # Randomly decide who goes first
         player = random.randint(0, 1)
         if player == 0:
-            print("Human player goes first.")
+            print("\nHuman player goes first.")
         else:
-            print('Computer goes first.')
+            print('\nComputer goes first.')
 
         # Main game loop
         while True:
             if player == 0:
+                print("=== Human Player's turn ===")
                 # Human player's turn
                 human_tank, computer_tank = human_play(human_tank, human_cards, water_cards_pile, power_cards_pile, computer_tank)
+                # Check if the human player has won
                 if filled_tank(human_tank):
-                    print("Human player wins!")
+                    print("Human player wins!\n")
                     break
-                player = 1
             else:
+                print("=== Computer Player's turn ===")
                 # Computer player's turn
                 computer_tank, human_tank = computer_play(computer_tank, computer_cards, water_cards_pile, power_cards_pile, human_tank)
+                # Check if the computer player has won
                 if filled_tank(computer_tank):
-                    print("Computer player wins!")
+                    print("Computer player wins!\n")
                     break
-                player = 0
-                
+            
+            # Switch turns
+            player = 1 - player
+            
             # Check and replenish piles if necessary
             check_pile(water_cards_pile, 'water')
             check_pile(power_cards_pile, 'power')
-                
+
     except Exception as e:
+        # Handle any unexpected errors
         print(f"An error occurred: {e}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
